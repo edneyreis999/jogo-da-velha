@@ -4,4 +4,6 @@ import App from './App';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const app = React.createElement(App);
+
+ReactDOM.render(app, document.getElementById('root'));

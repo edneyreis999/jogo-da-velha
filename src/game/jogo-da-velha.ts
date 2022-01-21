@@ -1,11 +1,25 @@
-import "phaser";
-import { EGameState, EOccupiedBy, IBoard, ISquare } from "./interface";
-import { logoImg, blankSquareImg, tttOxImg } from "./assets";
+import 'phaser';
+import { EGameState, EOccupiedBy, IBoard, ISquare } from './interface';
+import { logoImg, blankSquareImg, tttOxImg } from './assets';
+
 export default class JogoDaVelha extends Phaser.Scene {
   private gameInstance: Phaser.Game | null = null;
+
+  private config = {
+    type: Phaser.AUTO,
+    parent: 'phaser-example',
+    width: 620,
+    height: 620,
+    backgroundColor: 0x000000,
+    scene: JogoDaVelha,
+  };
+
   private currentTurn = EOccupiedBy.PLAYER_X;
+
   private board: IBoard;
+
   private currentGameState = EGameState.PLAYING;
+
   private possibleWins = [
     [0, 1, 2],
     [3, 4, 5],
@@ -18,7 +32,7 @@ export default class JogoDaVelha extends Phaser.Scene {
   ];
 
   constructor() {
-    super("demo");
+    super('demo');
     this.board = {
       squares: [],
     };
@@ -26,7 +40,7 @@ export default class JogoDaVelha extends Phaser.Scene {
 
   createGameInstance() {
     if (!this.gameInstance) {
-      this.gameInstance = new Phaser.Game(config);
+      this.gameInstance = new Phaser.Game(this.config);
     } else {
       this.restartScene(this.gameInstance);
     }
@@ -42,9 +56,9 @@ export default class JogoDaVelha extends Phaser.Scene {
   };
 
   preload() {
-    this.load.image("logo", logoImg);
-    this.load.image("blankSquare", blankSquareImg);
-    this.load.spritesheet("thePlayers", tttOxImg, {
+    this.load.image('logo', logoImg);
+    this.load.image('blankSquare', blankSquareImg);
+    this.load.spritesheet('thePlayers', tttOxImg, {
       frameWidth: 200,
       frameHeight: 173,
     });
@@ -71,22 +85,22 @@ export default class JogoDaVelha extends Phaser.Scene {
     let displayText: string;
 
     if (this.currentTurn === EOccupiedBy.PLAYER_X) {
-      displayText = "X WINS!";
+      displayText = 'X WINS!';
     } else if (this.currentTurn === EOccupiedBy.PLAYER_O) {
-      displayText = "O WINS!";
+      displayText = 'O WINS!';
     } else {
-      displayText = "TIE!";
+      displayText = 'TIE!';
     }
 
     let label = currentScene.add.text(x, y, displayText, {
-      fontSize: "104px Arial",
-      backgroundColor: "#00F",
+      fontSize: '104px Arial',
+      backgroundColor: '#00F',
     });
     label.setOrigin(0.5, 0.5);
     label.setInteractive();
 
     label.on(
-      "pointerdown",
+      'pointerdown',
       () => {
         this.restartScene(this.game);
       },
@@ -94,27 +108,27 @@ export default class JogoDaVelha extends Phaser.Scene {
     );
 
     label = currentScene.add.text(x, y, displayText, {
-      fontSize: "104px Arial",
+      fontSize: '104px Arial',
     });
     label.setOrigin(0.5, 0.5);
 
     currentScene.tweens.add({
       targets: label,
       alpha: 0,
-      ease: "Power1",
+      ease: 'Power1',
       duration: 1000,
       yoyo: true,
       repeat: -1,
     });
 
     if (this.currentTurn !== EOccupiedBy.NOBODY) {
-      for (let n = 0; n < winLine.length; n++) {
+      for (let n = 0; n < winLine.length; n += 1) {
         const sprite = this.board.squares[winLine[n]];
 
         currentScene.tweens.add({
           targets: sprite,
           angle: 360,
-          ease: "None",
+          ease: 'None',
           duration: 1000,
           repeat: -1,
         });
@@ -134,24 +148,24 @@ export default class JogoDaVelha extends Phaser.Scene {
     const currentScene = this.game.scene.getScenes()[0];
 
     const displayText = `Player ${
-      this.currentTurn === EOccupiedBy.PLAYER_X ? "X" : "O"
+      this.currentTurn === EOccupiedBy.PLAYER_X ? 'X' : 'O'
     } Turn`;
 
     const label = currentScene.add.text(x, y, displayText, {
-      fontSize: "72px Arial",
+      fontSize: '72px Arial',
     });
     label.setOrigin(0.5, 0.5);
 
     currentScene.tweens.add({
       targets: label,
       alpha: 0,
-      ease: "Power1",
+      ease: 'Power1',
       duration: 3000,
     });
   };
 
   checkForwinCondition = () => {
-    for (let line = 0; line < this.possibleWins.length; line++) {
+    for (let line = 0; line < this.possibleWins.length; line += 1) {
       const winLine = this.possibleWins[line];
       if (
         this.board.squares[winLine[0]].occupiedBy === this.currentTurn &&
@@ -163,7 +177,7 @@ export default class JogoDaVelha extends Phaser.Scene {
     }
 
     let movesLeft = false;
-    for (let n = 0; n < this.board.squares.length; n++) {
+    for (let n = 0; n < this.board.squares.length; n += 1) {
       if (this.board.squares[n].occupiedBy === EOccupiedBy.NOBODY) {
         movesLeft = true;
       }
@@ -174,6 +188,8 @@ export default class JogoDaVelha extends Phaser.Scene {
     }
 
     this.toggleTurn();
+
+    return true;
   };
 
   create() {
@@ -183,19 +199,19 @@ export default class JogoDaVelha extends Phaser.Scene {
     const blankSquareSize = 200; // 200x200 square
     const halfBlankSquareSize = 100;
     // chamar um método no back que vai voltar 9 squares
-    for (let row = 0; row < 3; row++) {
+    for (let row = 0; row < 3; row += 1) {
       const y = halfBlankSquareSize + blankSquareSize * row + row * 10;
 
       // This inner loop gets executed before the outer loop
       // so our sprites will be created by column first, then by row
-      for (let col = 0; col < 3; col++) {
+      for (let col = 0; col < 3; col += 1) {
         const x = halfBlankSquareSize + blankSquareSize * col + col * 10;
 
-        const square: ISquare = this.add.sprite(x, y, "blankSquare");
+        const square: ISquare = this.add.sprite(x, y, 'blankSquare');
         this.board.squares.push(square);
         square.occupiedBy = EOccupiedBy.NOBODY;
         square.setInteractive();
-        square.on("pointerdown", () => {
+        square.on('pointerdown', () => {
           if (
             square.occupiedBy === EOccupiedBy.NOBODY &&
             this.currentGameState === EGameState.PLAYING
@@ -204,7 +220,7 @@ export default class JogoDaVelha extends Phaser.Scene {
             this.add.sprite(
               square.x,
               square.y,
-              "thePlayers",
+              'thePlayers',
               square.occupiedBy
             );
             this.checkForwinCondition();
@@ -214,12 +230,3 @@ export default class JogoDaVelha extends Phaser.Scene {
     }
   }
 }
-
-const config = {
-  type: Phaser.AUTO,
-  parent: "phaser-example",
-  width: 620,
-  height: 620,
-  backgroundColor: 0x000000,
-  scene: JogoDaVelha,
-};
