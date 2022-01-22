@@ -1,0 +1,11 @@
+{
+  "preload": {
+    "files": [
+      {
+        "type": "image",
+        "key": "cookie1",
+        "url": "./src/assets/images/cookie1.png"
+      }
+    ]
+  }
+}

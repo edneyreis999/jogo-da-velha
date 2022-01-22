@@ -2,7 +2,7 @@ import React from 'react';
 import 'phaser';
 import Container from 'react-bootstrap/Container';
 import { Col, Row } from 'react-bootstrap';
-import JogoDaVelha from './game/game';
+import { GameConfig } from './config';
 
 const App: React.FC = () => {
   return (
@@ -17,7 +17,7 @@ const App: React.FC = () => {
       <Container>
         <Row className="justify-content-md-center">
           <Col md="auto">
-            <Container id="phaser-example" />
+            <Container id="game-refactor" />
           </Col>
         </Row>
       </Container>
@@ -29,13 +29,5 @@ export default App;
 
 window.addEventListener('load', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const game = new Phaser.Game({
-    type: Phaser.AUTO,
-    parent: 'phaser-example',
-    width: 620,
-    height: 620,
-    title: 'Jogo da Velha',
-    backgroundColor: 0x000000,
-    scene: JogoDaVelha,
-  });
+  const game = new Phaser.Game(GameConfig);
 });

@@ -1,6 +1,19 @@
 import 'phaser';
-import { EGameState, EOccupiedBy, IBoard, ISquare } from './interface';
-import { logoImg, blankSquareImg, tttOxImg } from './assets';
+import {
+  EGameState,
+  EOccupiedBy,
+  IBoard,
+  ISquare,
+} from '../interfaces/interface';
+import {
+  elf_red,
+  elf_blue,
+  orc_red,
+  orc_blue,
+  dwarf_red,
+  dwarf_blue,
+  tile,
+} from '../../assets';
 
 export default class JogoDaVelha extends Phaser.Scene {
   private gameInstance: Phaser.Game | null = null;
@@ -39,12 +52,8 @@ export default class JogoDaVelha extends Phaser.Scene {
   };
 
   preload() {
-    this.load.image('logo', logoImg);
-    this.load.image('blankSquare', blankSquareImg);
-    this.load.spritesheet('thePlayers', tttOxImg, {
-      frameWidth: 200,
-      frameHeight: 173,
-    });
+    this.load.image('blankSquare', tile);
+    this.load.image('player-x', dwarf_blue);
   }
 
   gameHasWinner = (winLine: number[]) => {
