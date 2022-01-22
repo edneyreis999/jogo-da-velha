@@ -5,15 +5,6 @@ import { logoImg, blankSquareImg, tttOxImg } from './assets';
 export default class JogoDaVelha extends Phaser.Scene {
   private gameInstance: Phaser.Game | null = null;
 
-  private config = {
-    type: Phaser.AUTO,
-    parent: 'phaser-example',
-    width: 620,
-    height: 620,
-    backgroundColor: 0x000000,
-    scene: JogoDaVelha,
-  };
-
   private currentTurn = EOccupiedBy.PLAYER_X;
 
   private board: IBoard;
@@ -31,19 +22,11 @@ export default class JogoDaVelha extends Phaser.Scene {
     [2, 5, 8],
   ];
 
-  constructor() {
-    super('demo');
+  constructor(config: Phaser.Types.Core.GameConfig) {
+    super(config);
     this.board = {
       squares: [],
     };
-  }
-
-  createGameInstance() {
-    if (!this.gameInstance) {
-      this.gameInstance = new Phaser.Game(this.config);
-    } else {
-      this.restartScene(this.gameInstance);
-    }
   }
 
   restartScene = (gameInstance: Phaser.Game) => {
@@ -85,7 +68,7 @@ export default class JogoDaVelha extends Phaser.Scene {
     let displayText: string;
 
     if (this.currentTurn === EOccupiedBy.PLAYER_X) {
-      displayText = 'X WINS!';
+      displayText = 'X WINSSS!';
     } else if (this.currentTurn === EOccupiedBy.PLAYER_O) {
       displayText = 'O WINS!';
     } else {
