@@ -8,6 +8,7 @@ export const CONST = {
   tilePadding: 5,
   tileTexture: 'tile',
   heroTypes: ['orc', 'elf', 'dwarf'],
+  iaLevel: 'medium',
   possibleWins: [
     [0, 1, 2],
     [3, 4, 5],

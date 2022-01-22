@@ -1,5 +1,6 @@
 import { CONST } from '../const/const';
 import { EGameState, EOccupiedBy } from '../interfaces/interface';
+import { Alfa } from '../objects/ai';
 import { Tile } from '../objects/tile';
 import { EGameImage } from './boot-scene';
 
@@ -16,6 +17,8 @@ export class GameScene extends Phaser.Scene {
   private currentTurn: EOccupiedBy;
 
   private currentGameState = EGameState.PLAYING;
+
+  private alfa: Alfa;
 
   constructor() {
     super({
@@ -45,6 +48,10 @@ export class GameScene extends Phaser.Scene {
 
     // Selected Tiles
     this.firstSelectedTile = undefined;
+
+    // Init AI
+    this.alfa = new Alfa();
+    this.alfa.init();
   }
 
   /**
@@ -65,8 +72,9 @@ export class GameScene extends Phaser.Scene {
 
     newTile.on(
       'pointerdown',
-      () => {
+      async () => {
         if (this.canMove) {
+          this.canMove = false;
           if (
             newTile.getOccupiedBy() === EOccupiedBy.NOBODY &&
             this.currentGameState === EGameState.PLAYING
@@ -82,12 +90,14 @@ export class GameScene extends Phaser.Scene {
 
             const winLine = this.checkForwinLine();
             if (!winLine) {
-              this.toggleTurn();
+              await this.toggleTurn();
             } else if (winLine && winLine.length > 0) {
               this.gameHasWinner(winLine);
             } else {
               this.gameIsATie();
             }
+
+            this.canMove = true;
           }
         }
       },
@@ -144,9 +154,9 @@ export class GameScene extends Phaser.Scene {
     let displayText: string;
 
     if (this.currentTurn === EOccupiedBy.PLAYER_X) {
-      displayText = 'Red Won!!';
+      displayText = 'You Won!!';
     } else if (this.currentTurn === EOccupiedBy.PLAYER_O) {
-      displayText = 'Blue Won!!';
+      displayText = 'Enemy Won!!';
     } else {
       displayText = 'TIE!';
     }
@@ -195,7 +205,7 @@ export class GameScene extends Phaser.Scene {
     }
   };
 
-  toggleTurn = () => {
+  toggleTurn = async () => {
     this.currentTurn =
       this.currentTurn === EOccupiedBy.PLAYER_X
         ? EOccupiedBy.PLAYER_O
@@ -207,7 +217,7 @@ export class GameScene extends Phaser.Scene {
     const currentScene = this.game.scene.getScenes()[0];
 
     const displayText = `${
-      this.currentTurn === EOccupiedBy.PLAYER_X ? 'Red' : 'Blue'
+      this.currentTurn === EOccupiedBy.PLAYER_X ? 'Your' : `Enemy's`
     } Turn`;
 
     const label = currentScene.add.text(x, y, displayText, {
@@ -221,6 +231,31 @@ export class GameScene extends Phaser.Scene {
       ease: 'Power1',
       duration: 1000,
     });
+
+    if (this.currentTurn === EOccupiedBy.PLAYER_O) {
+      await this.iaTurn();
+    }
+  };
+
+  iaTurn = async () => {
+    const tileChosenByAlfa = await this.alfa.getMove(this.board);
+    tileChosenByAlfa.setOccupiedBy(this.currentTurn);
+    const imageToSpawn: EGameImage =
+      this.currentTurn === EOccupiedBy.PLAYER_X
+        ? EGameImage.ELF_X
+        : EGameImage.ELF_O;
+    this.add.sprite(tileChosenByAlfa.x, tileChosenByAlfa.y, imageToSpawn);
+
+    const winLine = this.checkForwinLine();
+    if (!winLine) {
+      await this.toggleTurn();
+    } else if (winLine && winLine.length > 0) {
+      this.gameHasWinner(winLine);
+    } else {
+      this.gameIsATie();
+    }
+
+    this.canMove = true;
   };
 
   restartScene = (gameInstance: Phaser.Game) => {
