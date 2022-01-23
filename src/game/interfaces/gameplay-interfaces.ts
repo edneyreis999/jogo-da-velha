@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 
-export enum EOccupiedBy {
-  PLAYER_O,
-  PLAYER_X,
+export enum EPlayer {
+  ALFA,
+  PLAYER,
   NOBODY,
 }
 
@@ -12,7 +12,7 @@ export enum EGameState {
 }
 
 export interface ISquare extends Phaser.GameObjects.Sprite {
-  occupiedBy?: EOccupiedBy;
+  occupiedBy?: EPlayer;
 }
 
 export interface IBoard {

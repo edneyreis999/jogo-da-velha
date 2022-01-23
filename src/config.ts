@@ -1,5 +1,6 @@
 import { BootScene } from './game/scenes/boot-scene';
 import { GameScene } from './game/scenes/game-scene';
+import { HUDScene } from './game/scenes/hud-scene';
 
 export const GameConfig: Phaser.Types.Core.GameConfig = {
   title: 'Super Tic Tac Toe',
@@ -8,7 +9,7 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
   height: 620,
   type: Phaser.AUTO,
   parent: 'game-refactor',
-  scene: [BootScene, GameScene],
+  scene: [BootScene, HUDScene, GameScene],
   backgroundColor: '#de3412',
-  render: { pixelArt: false, antialias: true },
+  render: { pixelArt: true, antialias: false },
 };

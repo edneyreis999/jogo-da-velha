@@ -1,24 +1,8 @@
-import { CONST } from '../const/const';
-import { EGameState, EOccupiedBy } from '../interfaces/interface';
-import { Alfa } from '../objects/ai';
 import { Tile } from '../objects/tile';
-import { EGameImage } from './boot-scene';
+import { GameController } from '../controller/game-controller';
 
 export class GameScene extends Phaser.Scene {
-  // Variables
-  private canMove: boolean;
-
-  // Grid with tiles
-  private board!: Tile[];
-
-  // Selected Tiles
-  private firstSelectedTile: Tile | undefined;
-
-  private currentTurn: EOccupiedBy;
-
-  private currentGameState = EGameState.PLAYING;
-
-  private alfa: Alfa;
+  private gameController: GameController;
 
   constructor() {
     super({
@@ -27,247 +11,40 @@ export class GameScene extends Phaser.Scene {
   }
 
   init(): void {
-    // Init variables
-    this.canMove = true;
-    this.currentTurn = EOccupiedBy.PLAYER_X;
-    this.currentGameState = EGameState.PLAYING;
+    // Init the game controller
+    this.gameController = new GameController(this);
 
     // set background color
     this.cameras.main.setBackgroundColor('#606252');
 
-    // Init grid with tiles
-    this.board = [];
-    let tileCounter = 0;
-    for (let y = 0; y < CONST.gridHeight; y += 1) {
-      for (let x = 0; x < CONST.gridWidth; x += 1) {
-        const newTile = this.addTile(x, y);
-        this.board[tileCounter] = newTile;
-        tileCounter += 1;
-      }
-    }
+    // create events from hud
+    const hud = this.scene.get('HUDScene');
+    hud.events.on('labelWinnerClicked', this.restartScene, this);
 
-    // Selected Tiles
-    this.firstSelectedTile = undefined;
-
-    // Init AI
-    this.alfa = new Alfa();
-    this.alfa.init();
+    // create events from scene
+    this.input.on('pointerdown', this.handlePlayerClick, this);
   }
 
   /**
-   * Add a new random tile at the specified position.
-   * @param x
-   * @param y
+   * This function gets called, as soon as a tile has been pressed or clicked.
+   * @param pointer
+   * @param gameobject
+   * @param event
    */
-  private addTile(x: number, y: number): Tile {
-    // Get a random tile
-    const randomTileType: string = CONST.tileTexture;
-    // Return the created tile
-    const newTile = new Tile({
-      scene: this,
-      x: x * (CONST.tileWidth + +CONST.tilePadding) + CONST.width / 3,
-      y: y * (CONST.tileHeight + CONST.tilePadding) + CONST.tileHeight,
-      texture: randomTileType,
+  private async handlePlayerClick(
+    pointer: any,
+    gameObjectArray: Array<Phaser.GameObjects.GameObject>
+  ) {
+    gameObjectArray.forEach((gameObject: Phaser.GameObjects.GameObject) => {
+      if (gameObject instanceof Tile) {
+        const tile: Tile = gameObject;
+        this.gameController.handleTileOccupation(tile);
+      }
     });
-
-    newTile.on(
-      'pointerdown',
-      async () => {
-        if (this.canMove) {
-          this.canMove = false;
-          if (
-            newTile.getOccupiedBy() === EOccupiedBy.NOBODY &&
-            this.currentGameState === EGameState.PLAYING
-          ) {
-            newTile.setOccupiedBy(this.currentTurn);
-
-            const imageToSpawn: EGameImage =
-              this.currentTurn === EOccupiedBy.PLAYER_X
-                ? EGameImage.ELF_X
-                : EGameImage.ELF_O;
-
-            this.add.sprite(newTile.x, newTile.y, imageToSpawn);
-
-            const winLine = this.checkForwinLine();
-            if (!winLine) {
-              await this.toggleTurn();
-            } else if (winLine && winLine.length > 0) {
-              this.gameHasWinner(winLine);
-            } else {
-              this.gameIsATie();
-            }
-
-            this.canMove = true;
-          }
-        }
-      },
-      this
-    );
-
-    return newTile;
   }
 
-  checkForwinLine(): number[] | undefined {
-    for (let line = 0; line < CONST.possibleWins.length; line += 1) {
-      const winLine = CONST.possibleWins[line];
-      if (
-        this.board[winLine[0]].getOccupiedBy() === this.currentTurn &&
-        this.board[winLine[1]].getOccupiedBy() === this.currentTurn &&
-        this.board[winLine[2]].getOccupiedBy() === this.currentTurn
-      ) {
-        return winLine;
-      }
-    }
-
-    let movesLeft = false;
-    for (let n = 0; n < this.board.length; n += 1) {
-      if (this.board[n].getOccupiedBy() === EOccupiedBy.NOBODY) {
-        movesLeft = true;
-      }
-    }
-
-    if (!movesLeft) {
-      return [];
-    }
-
-    return undefined;
+  restartScene() {
+    this.scene.restart();
+    this.gameController.restartScene();
   }
-
-  gameHasWinner = (winLine: number[]) => {
-    this.currentGameState = EGameState.PAUSED;
-    this.broadcastWinner(winLine);
-  };
-
-  gameIsATie = () => {
-    this.currentGameState = EGameState.PAUSED;
-    this.currentTurn = EOccupiedBy.NOBODY;
-    this.broadcastWinner([]);
-  };
-
-  broadcastWinner = (winLine: number[]) => {
-    const currentScene = this.game.scene.getScenes()[0];
-    currentScene.tweens.killAll();
-
-    const x = CONST.width / 2;
-    const y = CONST.height / 2;
-
-    let displayText: string;
-
-    if (this.currentTurn === EOccupiedBy.PLAYER_X) {
-      displayText = 'You Won!!';
-    } else if (this.currentTurn === EOccupiedBy.PLAYER_O) {
-      displayText = 'Enemy Won!!';
-    } else {
-      displayText = 'TIE!';
-    }
-
-    let label = currentScene.add.text(x, y, displayText, {
-      fontSize: '104px Arial',
-      backgroundColor: '#00F',
-    });
-    label.setOrigin(0.5, 0.5);
-    label.setInteractive();
-
-    label.on(
-      'pointerdown',
-      () => {
-        this.restartScene(this.game);
-      },
-      this
-    );
-
-    label = currentScene.add.text(x, y, displayText, {
-      fontSize: '104px Arial',
-    });
-    label.setOrigin(0.5, 0.5);
-
-    currentScene.tweens.add({
-      targets: label,
-      alpha: 0,
-      ease: 'Power1',
-      duration: 1000,
-      yoyo: true,
-      repeat: -1,
-    });
-
-    if (this.currentTurn !== EOccupiedBy.NOBODY) {
-      for (let n = 0; n < winLine.length; n += 1) {
-        const sprite = this.board[winLine[n]];
-
-        currentScene.tweens.add({
-          targets: sprite,
-          angle: 360,
-          ease: 'None',
-          duration: 1000,
-          repeat: -1,
-        });
-      }
-    }
-  };
-
-  toggleTurn = async () => {
-    this.currentTurn =
-      this.currentTurn === EOccupiedBy.PLAYER_X
-        ? EOccupiedBy.PLAYER_O
-        : EOccupiedBy.PLAYER_X;
-
-    const x = +this.game.config.width / 2;
-    const y = +this.game.config.height / 2;
-
-    const currentScene = this.game.scene.getScenes()[0];
-
-    const displayText = `${
-      this.currentTurn === EOccupiedBy.PLAYER_X ? 'Your' : `Enemy's`
-    } Turn`;
-
-    const label = currentScene.add.text(x, y, displayText, {
-      fontSize: '72px Arial',
-    });
-    label.setOrigin(0.5, 0.5);
-
-    currentScene.tweens.add({
-      targets: label,
-      alpha: 0,
-      ease: 'Power1',
-      duration: 1000,
-    });
-
-    if (this.currentTurn === EOccupiedBy.PLAYER_O) {
-      await this.iaTurn();
-    }
-  };
-
-  iaTurn = async () => {
-    const tileChosenByAlfa = await this.alfa.getMove(this.board);
-    tileChosenByAlfa.setOccupiedBy(this.currentTurn);
-    const imageToSpawn: EGameImage =
-      this.currentTurn === EOccupiedBy.PLAYER_X
-        ? EGameImage.ELF_X
-        : EGameImage.ELF_O;
-    this.add.sprite(tileChosenByAlfa.x, tileChosenByAlfa.y, imageToSpawn);
-
-    const winLine = this.checkForwinLine();
-    if (!winLine) {
-      await this.toggleTurn();
-    } else if (winLine && winLine.length > 0) {
-      this.gameHasWinner(winLine);
-    } else {
-      this.gameIsATie();
-    }
-
-    this.canMove = true;
-  };
-
-  restartScene = (gameInstance: Phaser.Game) => {
-    const currentScene = gameInstance.scene.getScenes()[0];
-    if (currentScene) {
-      currentScene.scene.restart();
-      this.currentGameState = EGameState.PLAYING;
-      this.currentTurn = EOccupiedBy.PLAYER_X;
-    }
-  };
-
-  getCurrentTurn = () => {
-    return this.currentTurn;
-  };
 }

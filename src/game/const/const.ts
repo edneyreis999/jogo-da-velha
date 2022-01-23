@@ -3,12 +3,14 @@ export const CONST = {
   gridHeight: 3,
   width: 620,
   height: 620,
+  heroWidth: 62,
+  heroHeight: 62,
   tileWidth: 64,
   tileHeight: 72,
   tilePadding: 5,
   tileTexture: 'tile',
   heroTypes: ['orc', 'elf', 'dwarf'],
-  iaLevel: 'medium',
+  iaLevel: 'expert', // easy, medium, hard and expert
   possibleWins: [
     [0, 1, 2],
     [3, 4, 5],

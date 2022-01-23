@@ -1,8 +1,10 @@
+import { EPlayer } from '../interfaces/gameplay-interfaces';
 import { IImageConstructor } from '../interfaces/image.interface';
-import { EOccupiedBy } from '../interfaces/interface';
 
 export class Tile extends Phaser.GameObjects.Image {
-  private occupiedBy: EOccupiedBy = EOccupiedBy.NOBODY;
+  private currentScene: Phaser.Scene;
+
+  private occupiedBy: EPlayer = EPlayer.NOBODY;
 
   constructor(aParams: IImageConstructor) {
     super(aParams.scene, aParams.x, aParams.y, aParams.texture, aParams.frame);
@@ -10,7 +12,7 @@ export class Tile extends Phaser.GameObjects.Image {
     // set image settings
     // this.setOrigin(0, 0);
     this.setInteractive();
-
+    this.currentScene = aParams.scene;
     this.scene.add.existing(this);
   }
 
@@ -18,7 +20,8 @@ export class Tile extends Phaser.GameObjects.Image {
     return this.occupiedBy;
   }
 
-  setOccupiedBy(occupiedBy: EOccupiedBy) {
+  setOccupiedBy(occupiedBy: EPlayer) {
     this.occupiedBy = occupiedBy;
+    this.currentScene.events.emit('tileOccupied', this);
   }
 }

@@ -74,7 +74,9 @@ export class BootScene extends Phaser.Scene {
   }
 
   update(): void {
+    this.scene.start('HUDScene');
     this.scene.start('GameScene');
+    this.scene.bringToTop('HUDScene');
   }
 
   private createLoadingbar(): void {
