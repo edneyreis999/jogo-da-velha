@@ -1,4 +1,5 @@
 import { CONST } from '../const/const';
+import { EEVENTS } from '../const/events';
 import { EGameState, EPlayer } from '../interfaces/gameplay-interfaces';
 import { Alfa } from '../objects/ai';
 import { Tile } from '../objects/tile';
@@ -30,33 +31,14 @@ export class GameController {
 
     // Init grid with tiles
     this.board = [];
-    let tileCounter = 0;
-    for (let y = 0; y < CONST.gridHeight; y += 1) {
-      for (let x = 0; x < CONST.gridWidth; x += 1) {
-        const newTile = this.addTile(x, y);
-        this.board[tileCounter] = newTile;
-        tileCounter += 1;
-      }
-    }
 
     // Init AI
     this.alfa = new Alfa();
     this.alfa.init();
   }
 
-  private addTile(x: number, y: number): Tile {
-    const randomTileType: string = CONST.tileTexture;
-    // Return the created tile
-    const newTile = new Tile({
-      scene: this.currentScene,
-      x:
-        x * (CONST.tileWidth + +CONST.tilePadding) +
-        (CONST.width / 3 + CONST.tileWidth / 2),
-      y: y * (CONST.tileHeight + CONST.tilePadding) + CONST.tileHeight,
-      texture: randomTileType,
-    });
-
-    return newTile;
+  addTileToBoard(tile: Tile, tileIndex: number): void {
+    this.board[tileIndex] = tile;
   }
 
   async handleTileOccupation(tile: Tile) {
@@ -114,7 +96,7 @@ export class GameController {
     this.currentTurn =
       this.currentTurn === EPlayer.PLAYER ? EPlayer.ALFA : EPlayer.PLAYER;
 
-    this.currentScene.events.emit('toggleTurn', this.currentTurn);
+    this.currentScene.events.emit(EEVENTS.TOGGLE_TURN, this.currentTurn);
 
     if (this.currentTurn === EPlayer.ALFA) {
       await this.iaTurn();
@@ -133,12 +115,13 @@ export class GameController {
     const winnerTiles: Array<Tile> = this.board.filter((tile, index) => {
       return winLine.includes(index);
     });
-    this.currentScene.events.emit('hasWinner', winnerTiles);
+    this.currentScene.events.emit(EEVENTS.HAS_WINNER, winnerTiles);
   };
 
   gameIsATie = () => {
     this.currentGameState = EGameState.PAUSED;
     this.currentTurn = EPlayer.NOBODY;
+    this.currentScene.events.emit(EEVENTS.GAME_TIED);
   };
 
   restartScene = () => {

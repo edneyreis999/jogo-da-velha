@@ -1,3 +1,4 @@
+import { EEVENTS } from '../const/events';
 import { EPlayer } from '../interfaces/gameplay-interfaces';
 import { IImageConstructor } from '../interfaces/image.interface';
 
@@ -22,6 +23,6 @@ export class Tile extends Phaser.GameObjects.Image {
 
   setOccupiedBy(occupiedBy: EPlayer) {
     this.occupiedBy = occupiedBy;
-    this.currentScene.events.emit('tileOccupied', this);
+    this.currentScene.events.emit(EEVENTS.TILE_OCCUPIED, this);
   }
 }
