@@ -1,4 +1,5 @@
 import { CONST } from '../const/const';
+import { EEVENTS } from '../const/events';
 import { EPlayer } from '../interfaces/gameplay-interfaces';
 import { Tile } from '../objects/tile';
 import { EGameImage } from './boot-scene';
@@ -18,48 +19,30 @@ export class HUDScene extends Phaser.Scene {
   create() {
     // create events
     const level = this.scene.get('GameScene');
-    level.events.on('tileOccupied', this.updateTileOcupation, this);
-    level.events.on('toggleTurn', this.displayToggleTurnMessage, this);
-    level.events.on('hasWinner', this.displayWinner, this);
+    level.events.on(EEVENTS.TILE_OCCUPIED, this.updateTileOcupation, this);
+    level.events.on(EEVENTS.TOGGLE_TURN, this.displayToggleTurnMessage, this);
+    level.events.on(EEVENTS.HAS_WINNER, this.displayWinner, this);
+    level.events.on(EEVENTS.GAME_TIED, this.displayTie, this);
+  }
+
+  displayTie() {
+    const displayText: string = 'TIE!';
+    this.displayClickableLabel(displayText, EEVENTS.LABEL_WINNER_CLICKED);
   }
 
   displayWinner(tiles: Tile[]) {
     const firstTile = tiles[0];
     let displayText: string;
-    const x = CONST.width / 2;
-    const y = CONST.height / 2;
 
-    if (firstTile.getOccupiedBy() === EPlayer.PLAYER) {
+    if (firstTile?.getOccupiedBy() === EPlayer.PLAYER) {
       displayText = 'You Won!!';
-    } else if (firstTile.getOccupiedBy() === EPlayer.ALFA) {
-      displayText = 'Enemy Won!!';
     } else {
-      displayText = 'TIE!';
+      displayText = 'Enemy Won!!';
     }
 
-    const label = this.add.text(x, y, displayText, {
-      fontFamily: 'cursive',
-      fontSize: '70px',
-      backgroundColor: '',
-    });
-    label.setOrigin(0.5, 0.1);
-    label.setInteractive();
+    this.displayClickableLabel(displayText, EEVENTS.LABEL_WINNER_CLICKED);
 
-    label.on('pointerdown', () => {
-      this.events.emit('labelWinnerClicked');
-      this.scene.restart();
-    });
-
-    this.tweens.add({
-      targets: label,
-      alpha: 0,
-      ease: 'Power1',
-      duration: 1000,
-      yoyo: true,
-      repeat: -1,
-    });
-
-    if (firstTile.getOccupiedBy() !== EPlayer.NOBODY) {
+    if (firstTile) {
       tiles.forEach((tile) => {
         this.tweens.add({
           targets: tile,
@@ -99,5 +82,33 @@ export class HUDScene extends Phaser.Scene {
         : EGameImage.ELF_O;
 
     this.add.sprite(tile.x, tile.y, imageToSpawn);
+  }
+
+  private displayClickableLabel(displayText: string, eventEmit: EEVENTS) {
+    const x = CONST.width / 2;
+    const y = CONST.height / 2;
+
+    const label = this.add.text(x, y, displayText, {
+      fontFamily: 'cursive',
+      fontSize: '70px',
+      backgroundColor: '',
+    });
+
+    label.setOrigin(0.5, 0.5);
+    label.setInteractive();
+
+    label.on('pointerdown', () => {
+      this.events.emit(eventEmit);
+      this.scene.restart();
+    });
+
+    this.tweens.add({
+      targets: label,
+      alpha: 0,
+      ease: 'Power1',
+      duration: 1000,
+      yoyo: true,
+      repeat: -1,
+    });
   }
 }
