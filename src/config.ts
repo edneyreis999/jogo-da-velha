@@ -6,7 +6,7 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
   title: 'Super Tic Tac Toe',
   version: '1.0',
   width: 620,
-  height: 620,
+  height: 300,
   type: Phaser.AUTO,
   parent: 'game-refactor',
   scene: [BootScene, HUDScene, GameScene],

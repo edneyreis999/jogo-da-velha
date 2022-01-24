@@ -38,10 +38,11 @@ export class HUDScene extends Phaser.Scene {
     }
 
     const label = this.add.text(x, y, displayText, {
-      fontSize: '104px Arial',
-      backgroundColor: '#00F',
+      fontFamily: 'cursive',
+      fontSize: '70px',
+      backgroundColor: '',
     });
-    label.setOrigin(0.5, 0.5);
+    label.setOrigin(0.5, 0.1);
     label.setInteractive();
 
     label.on('pointerdown', () => {
@@ -78,9 +79,11 @@ export class HUDScene extends Phaser.Scene {
       player === EPlayer.PLAYER ? 'Your' : `Enemy's`
     } Turn`;
     const label = this.add.text(x, y, displayText, {
-      fontSize: '72px Arial',
+      fontFamily: 'cursive',
+      fontSize: '70px',
+      backgroundColor: '',
     });
-    label.setOrigin(0.5, 0.5);
+    label.setOrigin(0.5, 0.1);
     this.tweens.add({
       targets: label,
       alpha: 0,

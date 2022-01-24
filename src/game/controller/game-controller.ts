@@ -1,7 +1,9 @@
 import { CONST } from '../const/const';
 import { EGameState, EPlayer } from '../interfaces/gameplay-interfaces';
 import { Alfa } from '../objects/ai';
+import { Pawn } from '../objects/pawn';
 import { Tile } from '../objects/tile';
+import { EGameImage } from '../scenes/boot-scene';
 
 export class GameController {
   private currentScene: Phaser.Scene;
@@ -18,6 +20,8 @@ export class GameController {
 
   private alfa: Alfa;
 
+  private pawn!: Pawn[];
+
   constructor(currentScene: Phaser.Scene) {
     this.currentScene = currentScene;
     this.init();
@@ -27,6 +31,17 @@ export class GameController {
     this.canPlayerMove = true;
     this.currentTurn = EPlayer.PLAYER;
     this.currentGameState = EGameState.PLAYING;
+
+    // Init pawnButton
+    this.pawn = [];
+    let pawnCounter = 0;
+    for (let y = 0; y < CONST.gridHeight; y += 1) {
+      for (let x = 0; x < CONST.gridWidth; x += 1) {
+        const newPawn = this.addPawn(x, y);
+        this.pawn[pawnCounter] = newPawn;
+        pawnCounter += 1;
+      }
+    }
 
     // Init grid with tiles
     this.board = [];
@@ -44,8 +59,20 @@ export class GameController {
     this.alfa.init();
   }
 
+  addPawn(x: number, y: number) {
+    const newPawn = new Pawn({
+      scene: this.currentScene,
+      x:
+        x * (CONST.tileWidth + +CONST.tilePadding) +
+        (CONST.width / 3 + CONST.tileWidth / 2),
+      y: y * (CONST.tileHeight + CONST.tilePadding) + CONST.tileHeight,
+      texture: EGameImage.ELF_X,
+    });
+
+    return newPawn;
+  }
+
   private addTile(x: number, y: number): Tile {
-    const randomTileType: string = CONST.tileTexture;
     // Return the created tile
     const newTile = new Tile({
       scene: this.currentScene,
@@ -53,7 +80,7 @@ export class GameController {
         x * (CONST.tileWidth + +CONST.tilePadding) +
         (CONST.width / 3 + CONST.tileWidth / 2),
       y: y * (CONST.tileHeight + CONST.tilePadding) + CONST.tileHeight,
-      texture: randomTileType,
+      texture: EGameImage.TILE,
     });
 
     return newTile;

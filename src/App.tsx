@@ -10,7 +10,9 @@ const App: React.FC = () => {
       <Container className="p-5 mb-4 bg-light rounded-3">
         <Row className="justify-content-md-center">
           <Col md="auto">
-            <h1 className="header">O jogo da velha mais divertido do mundo</h1>
+            <h1 className="header" style={{ fontFamily: 'cursive' }}>
+              O jogo da velha mais divertido do mundo
+            </h1>
           </Col>
         </Row>
       </Container>
